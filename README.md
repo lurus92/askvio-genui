@@ -1,6 +1,7 @@
-# AskVio — Generative UI Widget
+# AskVio - Generative UI Prototype
 
-**AskVio** is an embeddable AI assistant that answers visitor questions with bespoke interactive UI — not paragraphs of text. When someone on your SaaS site asks "which plan fits me?", AskVio doesn't write a bullet list. It renders a plan-picker. When they ask "how much for my team?", it renders a live pricing calculator. When they want a demo, it renders a booking calendar.
+[**AskVio**](https://askvio.app?utm_source=ai-tinkers-hackaton) is an embeddable AI assistant that answers visitor questions. In the production version, it produces only textual output (and some simple product cards and links).
+In the context of the AI Tinkers Generative UI Hackaton we want to improve AskVio to render interactive UI. When someone on your site asks "which plan fits me?", AskVio shouldn't write a bullet list. It should render a plan-picker. When they ask "how much for my team?", it will renders a live pricing calculator. When they want a demo, it will render a booking calendar.
 
 This repo is the reference implementation built for the [AI Tinkerers Generative UI Hackathon](https://sf.aitinkerers.org/p/generative-ui-global-hackathon-agentic-interfaces-sf). It demonstrates the pattern: one embeddable widget, unlimited specialized interfaces.
 
@@ -8,14 +9,21 @@ This repo is the reference implementation built for the [AI Tinkerers Generative
 
 ## Live demo
 
-Three questions, three completely different generated UIs — all inside the same widget:
+Three questions, three completely different generated UIs all inside the same widget.
+These questions have been thought as they are the one that are most commonly asked by people using the widget on website of different industries. 
 
 | Question | Generated UI |
 |---|---|
-| "Which AskVio plan is right for a 15-person SaaS team?" | Interactive plan-comparison cards with the recommended plan highlighted |
+| "Which (AskVio) plan is right for a 15-person SaaS team?" | Interactive plan-comparison cards with the recommended plan highlighted |
 | "How much for ~8,000 conversations/month with 3 widgets?" | Live pricing calculator, pre-filled and interactive |
 | "Can I book a product demo this week?" | 5-day booking calendar, pick a slot and confirm |
 
+##### Outcome
+
+![Pricing Calculator](pricingcalculator.png)
+![Plan Selector](planselector.png)
+![Demo Calendar](democalendar.png)
+![Demo Booked](demobooked.png)
 ---
 
 ## Architecture
