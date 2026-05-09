@@ -278,4 +278,4 @@ MIT — built at the [AI Tinkerers Generative UI Global Hackathon](https://sf.ai
 
 ---
 
-> **AskVio** — [askvio.com](https://askvio.com)
+> **AskVio** — [askvio.app](https://askvio.app?utm_source=ai-tinkers-hackaton)
