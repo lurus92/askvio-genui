@@ -22,9 +22,9 @@ const splineMono = Spline_Sans_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AG-UI Canvas | CopilotKit Hackathon Starter",
+  title: "AskVio — Generative UI Widget",
   description:
-    "Hackathon starter kit: CopilotKit canvas + threads drawer + Deep Agents + Gemini + Notion MCP",
+    "AskVio: an embeddable AI assistant that answers visitor questions with bespoke interactive UI instead of plain text.",
 };
 
 export default function RootLayout({

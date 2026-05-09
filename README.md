@@ -1,208 +1,273 @@
-# Generative UI Global Hackathon: Agentic Interfaces Starter Kit
+# AskVio — Generative UI Widget
 
-![Hackathon Banner](apps/frontend/public/banner.jpg)
+**AskVio** is an embeddable AI assistant that answers visitor questions with bespoke interactive UI — not paragraphs of text. When someone on your SaaS site asks "which plan fits me?", AskVio doesn't write a bullet list. It renders a plan-picker. When they ask "how much for my team?", it renders a live pricing calculator. When they want a demo, it renders a booking calendar.
 
-Welcome to the **Generative UI Global Hackathon: Agentic Interfaces**! This starter kit gives you a complete AI-powered application with durable conversation threads, an agent-driven canvas, real-world MCP integrations, and a deployable MCP App — wired up with CopilotKit, LangChain Deep Agents, Gemini, A2UI, Notion MCP (via mcp-use), Manufact, and Daytona.
-
-## About this starter
-
-https://github.com/user-attachments/assets/f2a405c3-3cf4-44c8-bca3-2c8b8e6fed90
-
-This is a starter template for building agentic interfaces using Generative UI. It provides a modern Next.js application with an integrated [LangGraph Deep Agent](https://docs.langchain.com/oss/python/deepagents/overview) that manages a visual canvas of interactive cards with real-time AI synchronization and external tool integrations (a Notion "Leads" database, for this example) through MCP. A second deployable MCP server, built on mcp-use, gives the agent a third surface that runs natively in Claude or ChatGPT.
-
-This is an example application that we built to help you get started quickly. Everything you see can be customized, replaced, augmented, or built upon.
-
-https://github.com/user-attachments/assets/6f44cf84-e485-4c26-8703-481e0c9c2c54
-
-- **Persistent threads.** Every conversation is named, listed in the sidebar, and survives reloads, restarts, and resumes mid-run.
-- **Agent-driven canvas.** Lead cards, follow-up notes, and pipeline charts the AI can create, edit, and organize while you watch.
-- **Real integrations via MCP.** Notion Leads database sync out of the box; swap to any other MCP server with one config edit.
-- **Deployable MCP server.** A third agent surface that runs in Claude or ChatGPT, deployable with one command.
-- **Generative UI primed.** Stream Gemini-rendered components without re-plumbing.
+This repo is the reference implementation built for the [AI Tinkerers Generative UI Hackathon](https://sf.aitinkerers.org/p/generative-ui-global-hackathon-agentic-interfaces-sf). It demonstrates the pattern: one embeddable widget, unlimited specialized interfaces.
 
 ---
 
-## Generative UI
+## Live demo
 
-![Generative UI spectrum: Controlled → Declarative → Open-ended](apps/frontend/public/generative-ui-spectrum-v2.jpg)
+Three questions, three completely different generated UIs — all inside the same widget:
 
-"Generative UI" describes any AI-driven interface that the agent **chooses, composes, or writes at runtime**. Approaches sit on a spectrum — from **more control** on one end to **more flexibility** on the other — and most real apps mix several tiers.
-
-### Controlled (`useComponent`)
-
-The highest level of control. The developer provides the agent with a set of predefined React components, and the agent selects the appropriate one and populates it with props. This ensures the interface stays on-brand and pixel-perfect, making it ideal for standard, repeatable application workflows. See [Display Components](https://docs.copilotkit.ai/generative-ui/your-components/display-only) in the CopilotKit docs.
-
-### Declarative (`A2UI`)
-
-Utilizing the [A2UI](https://a2ui.org/) specification, this method uses a schema to map agent outputs to a catalog of renderers. It offers a balance between control and flexibility, allowing the agent to handle more varied UI layouts without requiring a unique tool for every single component. It is particularly effective for the "long tail" of user interactions. See [A2UI](https://docs.copilotkit.ai/generative-ui/a2ui) in the CopilotKit docs.
-
-### Open-ended (`MCP Apps`, `openGenerativeUI`)
-
-The "Wild West" of generative UI — the agent generates raw HTML that is rendered within a secure, sandboxed double-iframe. While it is the most flexible — enabling the creation of disposable, data-grounded interfaces on the fly — it is the hardest to style consistently and can behave unpredictably. See [opengenerativeui.copilotkit.ai](https://opengenerativeui.copilotkit.ai/) for a live demo, and the CopilotKit docs on [MCP Apps](https://docs.copilotkit.ai/generative-ui/mcp-apps) and [Open Generative UI](https://docs.copilotkit.ai/generative-ui/open-generative-ui).
-
-This kit is wired for all three: the canvas surface uses controlled cards for lead entities, A2UI streams declarative components from Gemini, and the deployable MCP server in `apps/mcp/` extends the same agent into Claude and ChatGPT's open-ended generative UI surface.
-
-**Go deeper:**
-
-- 🎥 Talk — [The Generative UI spectrum](https://www.youtube.com/watch?v=y4lln0yGMSE)
-- 📝 Article — [CopilotKit on Generative UI](https://x.com/CopilotKit/status/2047327612163293286)
+| Question | Generated UI |
+|---|---|
+| "Which AskVio plan is right for a 15-person SaaS team?" | Interactive plan-comparison cards with the recommended plan highlighted |
+| "How much for ~8,000 conversations/month with 3 widgets?" | Live pricing calculator, pre-filled and interactive |
+| "Can I book a product demo this week?" | 5-day booking calendar, pick a slot and confirm |
 
 ---
 
-## Stack
+## Architecture
 
-### CopilotKit
-
-CopilotKit connects your app's logic, state, and user context to the AI agents that deliver the animated and interactive part of your app experience — across both embedded UIs and fully headless interfaces. The kit ships with **CopilotKit Intelligence** wired in, giving you durable conversation threads (Postgres-backed), a runtime that bridges your frontend to any LangGraph agent, and built-in support for generative UI and MCP App composition.
-
-[More about CopilotKit ->](https://docs.copilotkit.ai)
-
-### LangChain Deep Agents
-
-LangChain Deep Agents is a Python framework that gives an LLM agent built-in planning, sub-agent dispatch, a virtual filesystem, and a TODO loop — the patterns popularized by Claude Code and Manus, packaged as a `create_deep_agent(...)` call on top of LangGraph. The kit uses Deep Agents as the brain behind the canvas: a single prompt like "import the workshop leads and draft outreach to the top 5" triggers a multi-step plan that the agent executes tool-by-tool while you watch the cards appear.
-
-[More about Deep Agents ->](https://github.com/langchain-ai/deepagents)
-
-### Gemini
-
-Gemini 3.1 Flash-Lite is Google's high-volume workhorse in the Gemini 3 family — fast, cheap, and tool-calling-capable. The kit defaults to **`gemini-3.1-flash-lite`** for chat — pick up an API key from [Google AI Studio](https://aistudio.google.com), drop it into `.env`, and you're done. Need a more reasoning-heavy model? Swap to **Gemini 3 Pro Preview** or **Gemini 3 Flash** with a one-line edit in `apps/agent/src/runtime.py` (`_gemini_llm`). Swapping to OpenAI, Anthropic, or any other LangChain-supported model is also a one-line edit (see [Switching to a different model](dev-docs/model-switching.md)).
-
-[More about Gemini ->](https://ai.google.dev/gemini-api/docs)
-
-### A2UI
-
-[A2UI](https://a2ui.org/) is a protocol for agent-driven interfaces — it lets AI agents generate rich, interactive UI that renders natively across web, mobile, and desktop **without executing arbitrary code**. That sandboxed-by-default model pairs well with the kit's generative UI surface: Gemini emits A2UI components, the renderer paints them, and the agent never ships executable code to the client. Browse the [custom catalog](https://a2ui-composer.ag-ui.com/custom-catalog) for component examples.
-
-[More about A2UI ->](https://github.com/google/A2UI)
-
-### Notion MCP (via mcp-use)
-
-The kit ships with a **Notion Leads database demo** wired through the official [Notion MCP server](https://github.com/makenotion/notion-mcp-server) (`@notionhq/notion-mcp-server`), called from Python via [mcp-use](https://manufact.com/mcp-use). MCP is the open protocol for connecting LLMs to tools — Anthropic publishes it, and Notion ships a first-party server. Swap to any other MCP server (Linear, Slack, GitHub, Google Drive, …) by changing one config dict in `apps/agent/src/notion_mcp.py` and updating the prompt's `INTEGRATION_PROMPT`.
-
-[More about MCP ->](https://modelcontextprotocol.io)
-
-### Manufact / mcp-use
-
-The kit's `apps/mcp/` package is an MCP server built with [`mcp-use`](https://manufact.com/mcp-use), an open-source TypeScript framework for building MCP servers and MCP Apps. `npm run dev:mcp` gives you a full development environment with a local Inspector and support for hot reload for quick iteration. Easily deploy the server to Manufact Cloud with `npm run -w mcp deploy`.
-
-[More about Manufact ->](https://manufact.com)
-
-### Daytona
-
-[Daytona](https://www.daytona.io/) is a secure and elastic infrastructure runtime for AI-generated code execution and agent workflows. Sandboxes spin up in under 90ms with full isolation — dedicated kernel, filesystem, network stack, and allocated vCPU/RAM/disk — and run any Python, TypeScript, or JavaScript code. Built on OCI/Docker compatibility with stateful environment snapshots, it's a natural fit when an agent in this kit needs to execute generated code or persist a workspace across sessions. Agents and developers interact with sandboxes programmatically through Daytona's SDKs, API, and CLI.
-
-[More about Daytona ->](https://github.com/daytonaio/daytona)
-
----
-
-## Run it locally
-
-1. Run `npx @copilotkit/cli@latest init` and select **Intelligence** when prompted.
-2. Drop a Gemini API key into **both** `.env` and `apps/agent/.env`. Then follow [Notion setup](#notion-setup) below for the integration token + database id.
-3. Run `npm install` then `npm run dev` (or `npm run dev:full` to include the MCP server).
-
-> `npm run dev` runs a pre-flight check (`scripts/check-env.sh`) before booting anything — it'll fail loudly with a numbered list of any missing keys, an unreachable Notion database, or a Docker daemon that isn't running. Fix what it lists, re-run, and you're off. See [dev-docs/troubleshooting.md](dev-docs/troubleshooting.md) for fixes per failure mode.
-
-Please give us feedback on your experience with it!
-
-### Notion setup
-
-The kit calls Notion through the official [Notion MCP server](https://github.com/makenotion/notion-mcp-server) — a standalone process spawned on demand via `npx -y @notionhq/notion-mcp-server`. Auth is a single Notion integration token plus an explicit per-database share. No global install, no OAuth flow, no third-party broker.
-
-The kit is wired against an "AI Workshop Provider Community" lead-form database. The fastest path is to duplicate the public sample into your own workspace; you can also re-import a CSV/ZIP if you'd rather start from a snapshot.
-
-**1. Get the database into your workspace.**
-
-- *Option A — duplicate the public sample (recommended).* Open the public template: [AI Workshop Provider Community](https://assorted-stomach-b12.notion.site/a274791c4e1e826d882d01562af74de9?v=0e04791c4e1e83ca834988083174d19e&source=copy_link). In the top-right of the page, click the **Duplicate** icon (two overlapping squares, next to the share icon and the `…` menu) and pick a destination workspace — schema, views, and seed rows all come along. Bookmark the URL of the duplicated copy; you'll need its database id in step 3.
-- *Option B — re-import the bundled snapshot.* In Notion, **Settings → Workspace → Import → Notion (CSV/ZIP)** and upload [`data/notion-leads-sample/ai-workshop-provider-community.zip`](data/notion-leads-sample/ai-workshop-provider-community.zip). A quick-look CSV lives next to it at [`ai-workshop-provider-community.csv`](data/notion-leads-sample/ai-workshop-provider-community.csv).
-
-**2. Create an integration and share it with the database.**
-
-1. Go to [notion.so/profile/integrations/internal](https://www.notion.so/profile/integrations/internal) → **New integration** → name it (e.g. "genai-starterkit") → copy the **Internal Integration Token** (starts with `ntn_…` or `secret_…`). Bookmark this page — it's also where you'll come back to rotate the token or audit which databases the integration can see.
-2. Open the duplicated database in Notion. Click the `…` menu in the top-right → **Connections** (count badge will read `0`) → **Add connection** → pick the integration you just created. The panel will flip to **Active connections** with your integration listed.
-
-> Notion's permission model is per-database — a fresh integration token sees zero databases until it's been shared into them. **Forgetting this share step is the most common point of failure.** If `npm run dev` boots cleanly but `Import the leads` fails with "object not found", come back here.
-
-> **Learn more:** Notion's [Getting started with the Notion API](https://developers.notion.com/guides/get-started/overview) covers integration types, the per-database share model, and the API surface the official MCP server wraps.
-
-**3. Paste the credentials into `.env`.**
-
-Pull the database id from the URL of your duplicated copy: it's the 32-char hex string between the workspace slug and the `?v=` query (e.g. `a274791c4e1e826d882d01562af74de9`).
-
-Paste both into `apps/agent/.env` (and `.env` at the repo root):
-
-```bash
-NOTION_TOKEN=<paste the Internal Integration Token>
-NOTION_LEADS_DATABASE_ID=<paste the database id from its Notion URL>
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Next.js frontend (port 3000)                               │
+│  ┌──────────────────────┐  ┌──────────────────────────────┐ │
+│  │  Product page (left) │  │  CopilotKit chat (right)     │ │
+│  │  Static AskVio info  │  │  Renders UI components inline│ │
+│  └──────────────────────┘  └──────────────────────────────┘ │
+└──────────────────────┬──────────────────────────────────────┘
+                       │ AG-UI / WebSocket
+┌──────────────────────▼──────────────────────────────────────┐
+│  BFF — Hono server (port 4000)                              │
+│  CopilotKit Runtime → LangGraph agent bridge                │
+└──────────────────────┬──────────────────────────────────────┘
+                       │ LangGraph API
+┌──────────────────────▼──────────────────────────────────────┐
+│  Python agent — LangGraph + Gemini (port 8133)              │
+│  Calls frontend tools: renderPlanPicker,                    │
+│  renderPricingCalculator, renderBookingSlots                │
+└─────────────────────────────────────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────────────┐
+│  CopilotKit Intelligence — Docker (Postgres + Redis)        │
+│  Durable conversation threads across sessions               │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-**4. Restart the agent.**
+**Stack:** Next.js · CopilotKit v2 · AG-UI · LangGraph · Gemini Flash-Lite · Hono · Docker
+
+The three generative UI components (`PlanPicker`, `PricingCalculator`, `BookingSlots`) are registered as frontend tools via `useFrontendTool({ render })`. The Python agent calls them by name; CopilotKit streams the component into the chat bubble in real time.
+
+---
+
+## How to run it locally
+
+### Prerequisites
+
+- **Node.js** ≥ 18 and **npm** ≥ 9
+- **Python** ≥ 3.11 with **[uv](https://docs.astral.sh/uv/)** — the project uses `uv` as the Python package manager
+- **Docker Desktop** (for Postgres + Redis via CopilotKit Intelligence)
+- A **Gemini API key** (free tier works) — get one at [aistudio.google.com](https://aistudio.google.com)
+- A **CopilotKit license token** — run `npm run license` after cloning (free for development)
+
+---
+
+### Step 1 — Clone and install dependencies
+
+```bash
+git clone https://github.com/your-org/askvio-genui-1.git
+cd askvio-genui-1
+npm install          # installs Node deps + runs `uv sync` for the Python agent
+```
+
+`npm install` also runs `uv sync` automatically (via `postinstall`). If it fails, run it manually:
+
+```bash
+cd apps/agent && uv sync && cd ../..
+```
+
+---
+
+### Step 2 — Set environment variables
+
+Copy the root example and the agent example:
+
+```bash
+cp .env.example .env
+cp apps/agent/.env.example apps/agent/.env
+```
+
+Then open **both** files and fill in these keys:
+
+#### `.env` (root — read by Next.js and BFF)
+
+| Variable | What to put | Where to get it |
+|---|---|---|
+| `GEMINI_API_KEY` | Your Gemini API key (starts with `AIza`) | [aistudio.google.com](https://aistudio.google.com) → **Get API key** |
+| `COPILOTKIT_LICENSE_TOKEN` | Your CopilotKit license token | Run `npm run license` in this repo |
+
+Leave all other variables at their defaults — the Docker ports, LangGraph URL, and BFF URL are pre-wired for local development.
+
+#### `apps/agent/.env` (read by LangGraph from the agent directory)
+
+Copy the same two keys:
+
+```bash
+GEMINI_API_KEY=AIza...          # same key as root .env
+COPILOTKIT_LICENSE_TOKEN=...    # same token as root .env
+```
+
+> **Shortcut:** after editing root `.env`, run `cp .env apps/agent/.env` to sync both files. Then remove the lines that aren't needed in the agent env (anything not in the agent's `.env.example`).
+
+#### Optional: use Claude Sonnet instead of Gemini
+
+If you have an Anthropic API key and want to run Claude Sonnet 4.6 as the agent model, set:
+
+```bash
+# In both .env and apps/agent/.env:
+AGENT_RUNTIME=claude-sonnet-4-6-react
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+---
+
+### Step 3 — Start Docker (CopilotKit Intelligence)
+
+Make sure Docker Desktop is running, then:
+
+```bash
+npm run dev:infra
+```
+
+This starts Postgres + Redis in Docker and seeds the default user. You'll see:
+
+```
+✔ Container intelligence-postgres  Started
+✔ Container intelligence-redis     Started
+Seeding default user... done.
+```
+
+> **Trouble?** If Docker isn't running you'll see `Cannot connect to Docker`. Start Docker Desktop and retry.
+
+---
+
+### Step 4 — Run the full dev stack
 
 ```bash
 npm run dev
 ```
 
-Then try: **"Import the workshop leads."**
+This concurrently starts three processes:
 
-> Need the manual / Docker-free path, or want to swap Notion for a different MCP server (Linear, Slack, GitHub, …)? See [dev-docs/setup.md](dev-docs/setup.md).
+| Process | Port | What it does |
+|---|---|---|
+| Next.js frontend (`ui`) | 3000 | The AskVio demo page |
+| BFF / CopilotKit Runtime (`bff`) | 4000 | Bridges frontend ↔ agent |
+| LangGraph agent (`agent`) | 8133 | Python agent with Gemini |
+
+Wait until all three show a "ready" message (usually ~15 seconds). You'll see:
+
+```
+[ui]    ✓  Ready in Xs — http://localhost:3000
+[bff]   BFF ready at http://localhost:4000
+[agent] INFO:     Application startup complete.
+```
 
 ---
 
-## Vibe coding
+### Step 5 — Open the demo
 
-The kit ships with skills pre-installed for Cursor, Claude Code, and any agent reading `.agent/`. Open the project in your coding tool and they're picked up automatically — no extra setup. They teach your coding agent CopilotKit's v2 API surface, MCP server / MCP App authoring patterns, and this kit's own conventions.
+Navigate to **[http://localhost:3000](http://localhost:3000)** — it redirects to `/demo`.
+
+You'll see the AskVio product page on the left and the chat assistant on the right. Three starter suggestions appear in the chat — click one or type your own question.
+
+**Try these to see each generative UI component:**
 
 ```
-.
-├── .agent/skills/   ← agent-tool-agnostic (read by any agent following the AGENTS.md convention)
-├── .claude/skills/  ← Claude Code
-└── .cursor/skills/  ← Cursor
+"Which AskVio plan is right for a 15-person SaaS team?"
 ```
+→ Renders `PlanPicker` — three plan cards with the recommended one highlighted.
 
-Each directory carries the same set of 11 skills:
-
-- **CopilotKit (8):** `copilotkit-{setup, develop, integrations, debug, upgrade, contribute, agui, self-update}` — from [CopilotKit/skills](https://github.com/CopilotKit/skills).
-- **MCP (3):** `mcp-builder`, `mcp-apps-builder`, `chatgpt-app-builder` — from the Manufact reference. They cover authoring an MCP server (the open protocol Anthropic publishes for wiring LLMs to external tools — the same protocol the kit's Notion integration uses) and packaging it as an MCP App that runs natively in Claude or ChatGPT.
-
-To **update** the CopilotKit skills to the latest upstream:
-
-```bash
-npx skills add copilotkit/skills --full-depth -y
 ```
+"How much would I pay for 8,000 conversations per month with 3 widgets?"
+```
+→ Renders `PricingCalculator` — pre-filled with your numbers, live-updating as you drag.
 
-### Connect to the CopilotKit docs MCP server
-
-CopilotKit also exposes a hosted MCP server that gives your coding agent live access to the latest CopilotKit reference material — handy when the checked-in skills lag upstream or you want to ask the docs questions interactively.
-
-**MCP endpoint:** `https://mcp.copilotkit.ai/mcp`
-
-**Claude Web** (Anthropic's web app — attaches MCP servers via Connectors):
-
-1. Open [Claude](https://claude.ai/), click your user in the bottom-left of the chat box, and select **Settings**.
-2. In the left-hand menu, select **Connectors** (or jump straight to the [Connectors settings page](https://claude.ai/settings/connectors)).
-3. Click **Add custom connector**.
-4. **Name:** `CopilotKit`
-5. **URL:** `https://mcp.copilotkit.ai/mcp`
-6. Click **Add**.
-
-Setup for Claude Code, Cursor, ChatGPT, and other coding agents is documented at [docs.copilotkit.ai/coding-agents](https://docs.copilotkit.ai/coding-agents).
-
-Reference docs: [CopilotKit Coding Agents](https://docs.copilotkit.ai/coding-agents) · [CopilotKit Skills repo](https://github.com/CopilotKit/skills) · [Agent Skills standard](https://agentskills.io).
+```
+"Can I book a product demo for this week?"
+```
+→ Renders `BookingSlots` — a 5-day calendar grid, pick a slot and confirm.
 
 ---
 
-## Documentation
+## Generative UI — how it works
 
-Deeper guides live in [`dev-docs/`](dev-docs/):
+The three components are registered as **frontend tools** in [`apps/frontend/src/app/demo/page.tsx`](apps/frontend/src/app/demo/page.tsx):
 
-- [Setup](dev-docs/setup.md) · [Model switching](dev-docs/model-switching.md) · [MCP server](dev-docs/mcp-server.md)
-- [Architecture](dev-docs/architecture.md) · [Customization](dev-docs/customization.md) · [Threads / Intelligence](dev-docs/threads.md)
-- [Scripts](dev-docs/scripts.md) · [Demo prompts](dev-docs/demo-prompts.md) · [Troubleshooting](dev-docs/troubleshooting.md)
+```tsx
+useFrontendTool({
+  name: "renderPlanPicker",
+  parameters: z.object({ recommended: ..., teamSize: ..., highlightFeatures: ... }),
+  render: ({ args }) => <PlanPicker {...args} />,
+});
+```
+
+The Python agent ([`apps/agent/src/prompts.py`](apps/agent/src/prompts.py)) knows these tools exist and is instructed to call them instead of writing text answers. CopilotKit's AG-UI protocol streams the tool call from the agent to the frontend, where the `render` function mounts the component inline in the chat.
+
+The result: same widget URL, completely different UI per question. No pre-built templates — the agent decides which component to render and how to populate its props.
+
+---
+
+## Project structure
+
+```
+apps/
+├── frontend/                   Next.js app
+│   └── src/
+│       ├── app/demo/page.tsx   Main demo page — tool registrations
+│       ├── components/demo/    Generative UI components
+│       │   ├── PlanPicker.tsx
+│       │   ├── PricingCalculator.tsx
+│       │   └── BookingSlots.tsx
+│       └── lib/demo/data.ts    Synthetic AskVio plan + slot data
+├── agent/                      Python LangGraph agent
+│   ├── main.py                 Entry point
+│   └── src/
+│       ├── prompts.py          AskVio system prompt + tool instructions
+│       └── runtime.py          Switchable model runtime
+├── bff/                        Hono BFF (CopilotKit Runtime)
+└── mcp/                        Deployable MCP server (Manufact/mcp-use)
+```
+
+---
+
+## Switching the AI model
+
+Edit `AGENT_RUNTIME` in `.env` and `apps/agent/.env`:
+
+| Value | Model | Notes |
+|---|---|---|
+| `gemini-flash-deep` | Gemini Flash-Lite + deepagents | Default; fast, free tier available |
+| `gemini-flash-react` | Gemini Flash-Lite + react agent | Simpler planner, lower latency |
+| `claude-sonnet-4-6-react` | Claude Sonnet 4.6 + react agent | Requires `ANTHROPIC_API_KEY` |
+
+---
+
+## Troubleshooting
+
+**`npm run dev` fails with "missing env vars"**
+Run `npm run check-env` to see which keys are missing and what to do about each one.
+
+**Chat says "Set `GEMINI_API_KEY`..."**
+The agent booted in noop mode because the key is missing or still set to the `stub-...` placeholder. Add your real key to both `.env` and `apps/agent/.env`, then restart.
+
+**Thread locked / "AgentThreadLockedError"**
+A previous turn errored mid-stream. Click **+** in the threads sidebar to start a fresh conversation.
+
+**Docker ports already in use**
+The `.env` defaults use non-standard ports (5433, 6381, 4203, 4403) to avoid collisions with other local stacks. If those are also in use, change the `*_HOST_PORT` vars in `.env`.
+
+**`uv sync` fails on Python deps**
+Make sure you have Python ≥ 3.11: `python3 --version`. If `uv` isn't installed: `pip install uv` or `brew install uv`.
+
+---
 
 ## License
 
-MIT.
+MIT — built at the [AI Tinkerers Generative UI Global Hackathon](https://sf.aitinkerers.org/p/generative-ui-global-hackathon-agentic-interfaces-sf).
 
 ---
 
-> Built for the Generative UI Global Hackathon: Agentic Interfaces.
+> **AskVio** — [askvio.com](https://askvio.com)
